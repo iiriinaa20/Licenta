@@ -168,7 +168,7 @@ def train(model, train_loader, optimizer, criterion, device, epoch, writer):
 
     train_loss /= len(train_loader.dataset)
     train_acc = 100. * correct / total
-    
+    train_acc = accuracy_score(all_targets,all_predictions)
     train_precision = precision_score(all_targets, all_predictions, average='weighted')
     train_recall = recall_score(all_targets, all_predictions, average='weighted')
     train_f1 = f1_score(all_targets, all_predictions, average='weighted')
@@ -180,7 +180,7 @@ def train(model, train_loader, optimizer, criterion, device, epoch, writer):
     writer.add_scalar('Recall/train', train_recall, epoch)
     writer.add_scalar('F1_Score/train', train_f1, epoch)
 
-    return train_loss, train_acc
+    return train_loss * 100, train_acc * 100
 
 def validate(model, val_loader, criterion, device, epoch, writer):
     model.eval()
@@ -206,6 +206,7 @@ def validate(model, val_loader, criterion, device, epoch, writer):
     val_loss /= len(val_loader.dataset)
     val_acc = 100. * correct / total
     
+    val_acc = accuracy_score(all_targets,all_predictions)
     val_precision = precision_score(all_targets, all_predictions, average='weighted')
     val_recall = recall_score(all_targets, all_predictions, average='weighted')
     val_f1 = f1_score(all_targets, all_predictions, average='weighted')
@@ -217,7 +218,7 @@ def validate(model, val_loader, criterion, device, epoch, writer):
     writer.add_scalar('Recall/val', val_recall, epoch)
     writer.add_scalar('F1_Score/val', val_f1, epoch)
 
-    return val_loss, val_acc
+    return val_loss * 100, val_acc * 100
 
 def test(model, test_loader, device):
     model.eval()
@@ -234,7 +235,9 @@ def test(model, test_loader, device):
             all_targets.extend(target.cpu().numpy())
             all_predictions.extend(pred.cpu().numpy())
 
+
     accuracy = correct / len(test_loader.dataset)
+    accuracy = accuracy_score(all_targets,all_predictions)
     precision = precision_score(all_targets, all_predictions, average='weighted')
     recall = recall_score(all_targets, all_predictions, average='weighted')
     f1 = f1_score(all_targets, all_predictions, average='weighted')
@@ -244,7 +247,7 @@ def test(model, test_loader, device):
     print(f'Test Recall: {recall:.4f}')
     print(f'Test F1 Score: {f1:.4f}')
 
-    return accuracy, precision, recall, f1
+    return accuracy * 100, precision, recall, f1
 
 # Define transformations
 print(f"Defining transformer")
@@ -259,17 +262,15 @@ transform = transforms.Compose([
 ])
 print(f"Defined transformer")
 
-# Define the path to your test data folder
-# test_data_dir = 'test'
-test_data_dir_main = "doubleA"
+test_data_dir_main = "a"
 test_data_dir = "C:\\Users\\mihae\\Desktop\\ooo\\"+test_data_dir_main
-model_path = test_data_dir_main+".pth"
+model_path = test_data_dir_main+"_main_model.pth"
 # Create a custom dataset
 print(f"Processing input")
 dataset = CustomImageFolder(test_data_dir, transform=transform)
 print(f"Processed input")
 # dataset.display_first_image()
-# Calculate sizes for train, validation, and test sets
+
 total_size = len(dataset)
 train_size = int(0.7 * total_size)
 val_size = int(0.15 * total_size)
@@ -283,10 +284,8 @@ print(f"Test Dataset Size: {test_size}")
 # Split the dataset manually
 train_data, val_data, test_data = torch.utils.data.random_split(
     dataset, [train_size, val_size, test_size], generator=torch.Generator()
-    # .manual_seed(42)
 )
 
-# Define dataloaders for train, validation, and test sets with drop_last=True
 train_loader = DataLoader(train_data, batch_size=128, shuffle=True)
 val_loader = DataLoader(val_data, batch_size=128)
 test_loader = DataLoader(test_data, batch_size=128)
@@ -302,13 +301,14 @@ scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=30, gamma=0.1)
 
 writer = SummaryWriter(log_dir='./logs')
 
-# print(f'Loading Model')
-# model.load_state_dict(torch.load('./nn_models/best_modelTest.pth'))
-# print(f'Loaded Model')
-epochs = 20
+print(f'Loading Model')
+model.load_state_dict(torch.load(model_path))
+print(f'Loaded Model')
+
+epochs = 0
 best_val_loss = float('inf')
-stop_val = 1e-3
-# Main training loop
+stop_val = 2e-4
+
 if epochs > 0:
     for epoch in range(1, epochs + 1):
         train_loss, train_acc = train(model, train_loader, optimizer, criterion, device, epoch, writer)
@@ -319,13 +319,12 @@ if epochs > 0:
         if val_loss < best_val_loss:
             best_val_loss = val_loss
             save_model(model,model_path)
-            # torch.save(model.state_dict(), 'best_modelTest2.pth')
+            
         if train_loss < stop_val:
             break
 
 print('Loading Model')
 model = load_model(model, model_path)
-# model.load_state_dict(torch.load('./nn_models/best_modelTest.pth'))
 print("Starting Testing")
 test_accuracy, test_precision, test_recall, test_f1 = test(model, test_loader, device)
 
