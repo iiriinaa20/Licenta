@@ -1,14 +1,12 @@
-import firebase_admin
-from firebase_admin import credentials, auth
 
 class AuthService:
-    def __init__(self,credentials_path: str):
-        self.credentials = credentials.Certificate(credentials_path)
-        self.auth_app = firebase_admin.initialize_app(self.credentials)
+    def __init__(self,database_connector):
+        self.db = database_connector
+    
         
     def login(self, jwt_token: str) -> str:
         try:
-            decoded_token = auth.verify_id_token(jwt_token)
+            decoded_token = self.db.auth.verify_id_token(jwt_token)
             uuid = decoded_token['user_id']
             return uuid
         except Exception as e:
@@ -16,9 +14,9 @@ class AuthService:
 
     def logout(self, jwt_token: str) -> bool:
         try:
-            decoded_token = auth.verify_id_token(jwt_token)
+            decoded_token = self.db.auth.verify_id_token(jwt_token)
             uuid = decoded_token['user_id']
-            auth.delete_user(uuid) #??
+            self.db.auth.delete_user(uuid) #??
             return True
         except Exception as e:
             return False

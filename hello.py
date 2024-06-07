@@ -2,6 +2,8 @@ from server import FlaskServer
 from services.auth_service import AuthService
 from services.camera_service import CameraService
 from services.face_detection_service import FaceDetectionService
+from services.repositories import UserRepository, CourseRepository, CoursesPlanificationRepository, AttendanceRepository
+from services import database_connector
 from env import *
 
 FACE_DETECTION_SERVICE = FaceDetectionService(config_required=True, 
@@ -12,7 +14,14 @@ FACE_DETECTION_SERVICE = FaceDetectionService(config_required=True,
 
 CAMERA_SERVICE = CameraService(face_detection_service= FACE_DETECTION_SERVICE)
 
-AUTH_SERVICE = AuthService(credentials_path=AUTH_CREDENTIALS_PATH)
+DB_CONNECTOR_SERVICE = database_connector.DatabaseConnector(AUTH_CREDENTIALS_PATH)
+
+AUTH_SERVICE = AuthService(database_connector=DB_CONNECTOR_SERVICE)
+
+UserRepository.db_con = DB_CONNECTOR_SERVICE
+CourseRepository.db_con = DB_CONNECTOR_SERVICE
+CoursesPlanificationRepository.db_con = DB_CONNECTOR_SERVICE
+AttendanceRepository.db_con = DB_CONNECTOR_SERVICE
 
 if __name__ == '__main__':
     server = FlaskServer(IP,PORT,MAIN_URL,CAMERA_SERVICE, AUTH_SERVICE)

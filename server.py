@@ -2,6 +2,7 @@ from flask import Flask, render_template, jsonify, request
 from flask_socketio import SocketIO, emit
 from services.camera_service import CameraService
 from services.auth_service import AuthService
+from services.repositories import *
 
 class FlaskServer:
     def __init__(self, ip: str, port: int, main_url: str, camera_service: CameraService, auth_service: AuthService):
@@ -62,6 +63,123 @@ class FlaskServer:
                 return jsonify({"message": "Camera feed stopped"}), 200
             except Exception as e:
                 return jsonify({"message": "Failed", "error": str(e)}), 500
+       
+        @self.app.route('/users', methods=['POST'])
+        def create_user():
+            data = request.json
+            UserRepository.create(data)
+            return jsonify({"msg": "User created successfully"}), 201
+
+        @self.app.route('/users/<user_id>', methods=['GET'])
+        def read_user(user_id):
+            user = UserRepository.read(user_id)
+            if user:
+                return jsonify(user)
+            else:
+                return jsonify({"error": "User not found"}), 404
+
+        @self.app.route('/users/<user_id>', methods=['PUT'])
+        def update_user(user_id):
+            data = request.json
+            UserRepository.update(user_id, data)
+            return jsonify({"msg": "User updated successfully"})
+
+        @self.app.route('/users/<user_id>', methods=['DELETE'])
+        def delete_user(user_id):
+            UserRepository.delete(user_id)
+            return jsonify({"msg": "User deleted successfully"})
+
+        # Course Routes
+        
+        @self.app.route('/add_course_form')
+        def add_course_form():
+             return render_template('add_course_form.html')
+
+        @self.app.route('/courses', methods=['GET'])
+        def read_courses():
+            courses = CourseRepository.read_all()
+            return jsonify(courses), 200
+        
+        @self.app.route('/courses', methods=['POST'])
+        def create_course():
+            data = request.json
+            CourseRepository.create(data)
+            return jsonify({"msg": "Course created successfully"}), 201
+
+        @self.app.route('/courses/<course_id>', methods=['GET'])
+        def read_course(course_id):
+            course = CourseRepository.read(course_id)
+            if course:
+                return jsonify(course)
+            else:
+                return jsonify({"error": "Course not found"}), 404
+
+        @self.app.route('/courses/<course_id>', methods=['PUT'])
+        def update_course(course_id):
+            data = request.json
+            CourseRepository.update(course_id, data)
+            return jsonify({"msg": "Course updated successfully"})
+
+        @self.app.route('/courses/<course_id>', methods=['DELETE'])
+        def delete_course(course_id):
+            CourseRepository.delete(course_id)
+            return jsonify({"msg": "Course deleted successfully"})
+
+        # Courses Planification Routes
+        @self.app.route('/courses_planification', methods=['POST'])
+        def create_courses_planification():
+            data = request.json
+            CoursesPlanificationRepository.create(data)
+            return jsonify({"msg": "Courses Planification created successfully"}), 201
+
+        @self.app.route('/courses_planification/<plan_id>', methods=['GET'])
+        def read_courses_planification(plan_id):
+            plan = CoursesPlanificationRepository.read(plan_id)
+            if plan:
+                return jsonify(plan)
+            else:
+                return jsonify({"error": "Courses Planification not found"}), 404
+
+        @self.app.route('/courses_planification/<plan_id>', methods=['PUT'])
+        def update_courses_planification(plan_id):
+            data = request.json
+            CoursesPlanificationRepository.update(plan_id, data)
+            return jsonify({"msg": "Courses Planification updated successfully"})
+
+        @self.app.route('/courses_planification/<plan_id>', methods=['DELETE'])
+        def delete_courses_planification(plan_id):
+            CoursesPlanificationRepository.delete(plan_id)
+            return jsonify({"msg": "Courses Planification deleted successfully"})
+
+        # Attendance Routes
+        @self.app.route('/attendance', methods=['POST'])
+        def create_attendance():
+            data = request.json
+            AttendanceRepository.create(data)
+            return jsonify({"msg": "Attendance created successfully"}), 201
+
+        @self.app.route('/attendance/<attendance_id>', methods=['GET'])
+        def read_attendance(attendance_id):
+            attendance = AttendanceRepository.read(attendance_id)
+            if attendance:
+                return jsonify(attendance)
+            else:
+                return jsonify({"error": "Attendance not found"}), 404
+
+        @self.app.route('/attendance/<attendance_id>', methods=['PUT'])
+        def update_attendance(attendance_id):
+            data = request.json
+            AttendanceRepository.update(attendance_id, data)
+            return jsonify({"msg": "Attendance updated successfully"})
+
+        @self.app.route('/attendance/<attendance_id>', methods=['DELETE'])
+        def delete_attendance(attendance_id):
+            AttendanceRepository.delete(attendance_id)
+            return jsonify({"msg": "Attendance deleted successfully"})
+        
+        @self.app.route('/view-courses', methods=['GET'])
+        def view_courses():
+            return render_template('courses.html')
 
     def _setup_socketio(self):
         @self.socketio.on('request_frame')

@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Course Management</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="#">Navbar</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item active">
+                    <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Link</a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Dropdown
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <a class="dropdown-item" href="#">Action</a>
+                        <a class="dropdown-item" href="#">Another action</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="#">Something else here</a>
+                    </div>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link disabled" href="#">Disabled</a>
+                </li>
+            </ul>
+            <form class="form-inline my-2 my-lg-0">
+                <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+                <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+            </form>
+        </div>
+    </nav>
+    <div class="container mt-5">
+        <h1 class="text-center m-y-10">Course Management</h1>
+        <br>
+        <div class="d-flex flex-column">
+            <h2 class="text-center">Add Course</h2>
+            <form id="add-course-form" class="d-flex justify-items-around align-items-center"
+                style="gap:10px!important;">
+                <div class="form-group">
+                    <label for="name">Course Name</label>
+                    <input type="text" class="form-control" id="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="credits">Credits</label>
+                    <input type="number" class="form-control" id="credits" required>
+                </div>
+                <div class="form-group">
+                    <label for="year">Year</label>
+                    <input type="number" class="form-control" id="year" required>
+                </div>
+                <div class="form-group">
+                    <label for="semester">Semester</label>
+                    <input type="text" class="form-control" id="semester" required>
+                </div>
+                <div class="form-group">
+                    <label for="submit" style="visibility: hidden;">A</label>
+                    <button type="submit" class="form-control btn btn-primary">Add Course</button>
+                </div>
+            </form>
+        </div>
+        <hr>
+        <h2>Courses List</h2>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Credits</th>
+                    <th>Year</th>
+                    <th>Semester</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="courses-table-body">
+                <!-- Courses will be dynamically added here -->
+            </tbody>
+        </table>
+        <div class="row">
+            <h2>Update Course</h2>
+            <form id="update-course-form" class="d-flex justify-items-around align-items-center"
+                style="gap:10px!important;">
+                <div class="form-group">
+                    <label for="update-course-id">Course ID</label>
+                    <input type="text" readonly class="form-control" id="update-course-id" required>
+                </div>
+                <div class="form-group">
+                    <label for="update-name">Course Name</label>
+                    <input type="text" class="form-control" id="update-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="update-credits">Credits</label>
+                    <input type="number" class="form-control" id="update-credits" required>
+                </div>
+                <div class="form-group">
+                    <label for="update-year">Year</label>
+                    <input type="number" class="form-control" id="update-year" required>
+                </div>
+                <div class="form-group">
+                    <label for="update-semester">Semester</label>
+                    <input type="text" class="form-control" id="update-semester" required>
+                </div>
+                <div class="form-group">
+                    <label for="submit" style="visibility: hidden;">A</label>
+                    <button type="submit" class="form-control btn btn-warning">Update Course</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script>
+        function fetchCourses() {
+            $.get("/courses", function (data) {
+                const coursesTableBody = $("#courses-table-body");
+                coursesTableBody.empty();
+                data.forEach(course => {
+                    coursesTableBody.append(`
+                        <tr>
+                            <td>${course.id}</td>
+                            <td>${course.name}</td>
+                            <td>${course.credits}</td>
+                            <td>${course.year}</td>
+                            <td>${course.semester}</td>
+                            <td>
+                                <button class="btn btn-info btn-sm" onclick="readCourse('${course.id}')">Read</button>
+                                <button class="btn btn-warning btn-sm" onclick="loadCourseToUpdate('${course.id}')">Update</button>
+                                <button class="btn btn-danger btn-sm" onclick="deleteCourse('${course.id}')">Delete</button>
+                            </td>
+                        </tr>
+                    `);
+                });
+            });
+        }
+
+        function readCourse(courseId) {
+            $.get(`/courses/${courseId}`, function (data) {
+                alert(JSON.stringify(data, null, 2));
+            }).fail(function () {
+                alert("Course not found");
+            });
+        }
+
+        function deleteCourse(courseId) {
+            $.ajax({
+                url: `/courses/${courseId}`,
+                type: 'DELETE',
+                success: function (result) {
+                    fetchCourses();
+                }
+            });
+        }
+
+        function loadCourseToUpdate(courseId) {
+            $.get(`/courses/${courseId}`, function (data) {
+                $("#update-course-id").val(courseId);
+                $("#update-name").val(data.name);
+                $("#update-credits").val(data.credits);
+                $("#update-year").val(data.year);
+                $("#update-semester").val(data.semester);
+            }).fail(function () {
+                alert("Course not found");
+            });
+        }
+
+        $(document).ready(function () {
+            fetchCourses();
+
+            $("#add-course-form").submit(function (event) {
+                event.preventDefault();
+                const data = {
+                    name: $("#name").val(),
+                    credits: $("#credits").val(),
+                    year: $("#year").val(),
+                    semester: $("#semester").val()
+                };
+                $.ajax({
+                    url: "/courses",
+                    type: "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify(data),
+                    success: function () {
+                        fetchCourses();
+                        $("#add-course-form")[0].reset();
+                    }
+                });
+            });
+
+            $("#update-course-form").submit(function (event) {
+                event.preventDefault();
+                const courseId = $("#update-course-id").val();
+                const data = {
+                    name: $("#update-name").val(),
+                    credits: $("#update-credits").val(),
+                    year: $("#update-year").val(),
+                    semester: $("#update-semester").val()
+                };
+                $.ajax({
+                    url: `/courses/${courseId}`,
+                    type: "PUT",
+                    contentType: "application/json",
+                    data: JSON.stringify(data),
+                    success: function () {
+                        fetchCourses();
+                        $("#update-course-form")[0].reset();
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Courses</title>
+</head>
+<body>
+    <h1>Courses</h1>
+    <table border="1">
+        <tr>
+            <th>Name</th>
+            <th>Credits</th>
+            <th>Year</th>
+            <th>Semester</th>
+        </tr>
+        {% for course in courses %}
+        <tr>
+            <td>{{ course.Name }}</td>
+            <td>{{ course.Credits }}</td>
+            <td>{{ course.Year }}</td>
+            <td>{{ course.Semester }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <button onclick="window.location.href='/add_course_form'">Add Course</button>
+
+</body>
+</html>
