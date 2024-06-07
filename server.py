@@ -64,6 +64,11 @@ class FlaskServer:
             except Exception as e:
                 return jsonify({"message": "Failed", "error": str(e)}), 500
        
+        @self.app.route('/users', methods=['GET'])
+        def read_users():
+            users = UserRepository.read_all()
+            return jsonify(users), 200
+       
         @self.app.route('/users', methods=['POST'])
         def create_user():
             data = request.json
@@ -131,7 +136,12 @@ class FlaskServer:
             data = request.json
             CoursesPlanificationRepository.create(data)
             return jsonify({"msg": "Courses Planification created successfully"}), 201
-
+        
+        @self.app.route('/courses_planification', methods=['GET'])
+        def read_courses_planifications():
+            courses = CoursesPlanificationRepository.read_all()
+            return jsonify(courses), 200
+        
         @self.app.route('/courses_planification/<plan_id>', methods=['GET'])
         def read_courses_planification(plan_id):
             plan = CoursesPlanificationRepository.read(plan_id)
@@ -157,6 +167,11 @@ class FlaskServer:
             data = request.json
             AttendanceRepository.create(data)
             return jsonify({"msg": "Attendance created successfully"}), 201
+        
+        @self.app.route('/attendance', methods=['GET'])
+        def read_attendances():
+            attendances = AttendanceRepository.read_all()
+            return jsonify(attendances), 200
 
         @self.app.route('/attendance/<attendance_id>', methods=['GET'])
         def read_attendance(attendance_id):
@@ -180,6 +195,18 @@ class FlaskServer:
         @self.app.route('/view-courses', methods=['GET'])
         def view_courses():
             return render_template('courses.html')
+        
+        @self.app.route('/view-users', methods=['GET'])
+        def view_users():
+            return render_template('users.html')
+        
+        @self.app.route('/view-course-planifications', methods=['GET'])
+        def view_course_planifications():
+            return render_template('courses_planifications.html')
+        
+        @self.app.route('/view-attendances', methods=['GET'])
+        def view_attendances():
+            return render_template('attendances.html')
 
     def _setup_socketio(self):
         @self.socketio.on('request_frame')

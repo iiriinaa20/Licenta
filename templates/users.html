@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>User Management</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="#">Navbar</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item active">
+                    <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Link</a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Dropdown
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <a class="dropdown-item" href="#">Action</a>
+                        <a class="dropdown-item" href="#">Another action</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="#">Something else here</a>
+                    </div>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link disabled" href="#">Disabled</a>
+                </li>
+            </ul>
+            <form class="form-inline my-2 my-lg-0">
+                <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+                <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+            </form>
+        </div>
+    </nav>
+    <div class="container mt-5">
+        <h1 class="text-center m-y-10">User Management</h1>
+        <br>
+        <div class="d-flex flex-column">
+            <h2 class="text-center">Add User</h2>
+            <form id="add-user-form" class="d-flex justify-items-around align-items-center"
+                style="gap:10px!important;">
+                <div class="form-group">
+                    <label for="name">User Name</label>
+                    <input type="text" class="form-control" id="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">E-mail</label>
+                    <input type="email" class="form-control" id="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="type">Type</label>
+                    <select class="form-control" id="type" required>
+                        <option value="teacher">Teacher</option>
+                        <option value="student">Student</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="submit" style="visibility: hidden;">A</label>
+                    <button type="submit" class="form-control btn btn-primary">Add User</button>
+                </div>
+            </form>
+        </div>
+        <hr>
+        <h2>Users List</h2>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>E-mail</th>
+                    <th>Type</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="users-table-body">
+                <!-- Users will be dynamically added here -->
+            </tbody>
+        </table>
+        <div class="row">
+            <h2>Update User</h2>
+            <form id="update-user-form" class="d-flex justify-items-around align-items-center"
+                style="gap:10px!important;">
+                <div class="form-group">
+                    <label for="update-user-id">User ID</label>
+                    <input type="text" readonly class="form-control" id="update-user-id" required>
+                </div>
+                <div class="form-group">
+                    <label for="update-name">User Name</label>
+                    <input type="text" class="form-control" id="update-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="update-email">E-mail</label>
+                    <input type="email" class="form-control" id="update-email" required>
+                </div>
+                <div class="form-group">
+                    <label for="update-type">Type</label>
+                    <input type="text" class="form-control" id="update-type" required>
+                </div>
+                <div class="form-group">
+                    <label for="submit" style="visibility: hidden;">A</label>
+                    <button type="submit" class="form-control btn btn-warning">Update User</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script>
+        function fetchUsers() {
+            $.get("/users", function (data) {
+                const usersTableBody = $("#users-table-body");
+                usersTableBody.empty();
+                data.forEach(user => {
+                    usersTableBody.append(`
+                        <tr>
+                            <td>${user.id}</td>
+                            <td>${user.name}</td>
+                            <td>${user.email}</td>
+                            <td>${user.type}</td>
+                            <td>
+                                <button class="btn btn-info btn-sm" onclick="readUser('${user.id}')">Read</button>
+                                <button class="btn btn-warning btn-sm" onclick="loadUserToUpdate('${user.id}')">Update</button>
+                                <button class="btn btn-danger btn-sm" onclick="deleteUser('${user.id}')">Delete</button>
+                            </td>
+                        </tr>
+                    `);
+                });
+            });
+        }
+
+        function readUser(userId) {
+            $.get(`/users/${userId}`, function (data) {
+                alert(JSON.stringify(data, null, 2));
+            }).fail(function () {
+                alert("User not found");
+            });
+        }
+
+        function deleteUser(userId) {
+            $.ajax({
+                url: `/users/${userId}`,
+                type: 'DELETE',
+                success: function (result) {
+                    fetchUsers();
+                }
+            });
+        }
+
+        function loadUserToUpdate(userId) {
+            $.get(`/users/${userId}`, function (data) {
+                $("#update-user-id").val(userId);
+                $("#update-name").val(data.name);
+                $("#update-email").val(data.email);
+                $("#update-type").val(data.type);
+            }).fail(function () {
+                alert("User not found");
+            });
+        }
+
+        $(document).ready(function () {
+            fetchUsers();
+
+            $("#add-user-form").submit(function (event) {
+                event.preventDefault();
+                const data = {
+                    name: $("#name").val(),
+                    email: $("#email").val(),
+                    type: $("#type").val()
+                };
+                $.ajax({
+                    url: "/users",
+                    type: "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify(data),
+                    success: function () {
+                        fetchUsers();
+                        $("#add-user-form")[0].reset();
+                    }
+                });
+            });
+
+            $("#update-user-form").submit(function (event) {
+                event.preventDefault();
+                const userId = $("#update-user-id").val();
+                const data = {
+                    name: $("#update-name").val(),
+                    email: $("#update-email").val(),
+                    type: $("#update-type").val()
+                };
+                $.ajax({
+                    url: `/users/${userId}`,
+                    type: "PUT",
+                    contentType: "application/json",
+                    data: JSON.stringify(data),
+                    success: function () {
+                        fetchUsers();
+                        $("#update-user-form")[0].reset();
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>

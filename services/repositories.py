@@ -43,6 +43,10 @@ class UserRepository:
         user_ref = UserRepository.db_con.db.collection(UserRepository.collection_name).document(user_id)
         user = user_ref.get()
         return user.to_dict() if user.exists else None
+    
+    def read_all():
+        users_ref = UserRepository.db_con.db.collection(UserRepository.collection_name).stream()
+        return [{'id': user.id, **user.to_dict()} for user in users_ref]
 
     @staticmethod
     def update(user_id, data):
@@ -97,6 +101,10 @@ class CoursesPlanificationRepository:
         plan_ref = CoursesPlanificationRepository.db_con.db.collection(CoursesPlanificationRepository.collection_name).document(plan_id)
         plan = plan_ref.get()
         return plan.to_dict() if plan.exists else None
+    
+    def read_all():
+        courses_ref = CoursesPlanificationRepository.db_con.db.collection(CoursesPlanificationRepository.collection_name).stream()
+        return [{'id': course.id, **course.to_dict()} for course in courses_ref]
 
     @staticmethod
     def update(plan_id, data):
@@ -123,6 +131,10 @@ class AttendanceRepository:
         attendance = attendance_ref.get()
         return attendance.to_dict() if attendance.exists else None
 
+    def read_all():
+        attendances_ref = AttendanceRepository.db_con.db.collection(AttendanceRepository.collection_name).stream()
+        return [{'id': attendance.id, **attendance.to_dict()} for attendance in attendances_ref]
+   
     @staticmethod
     def update(attendance_id, data):
         attendance_ref = AttendanceRepository.db_con.db.collection(AttendanceRepository.collection_name).document(attendance_id)
